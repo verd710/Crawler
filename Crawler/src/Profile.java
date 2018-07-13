@@ -1,7 +1,7 @@
 
 abstract class Profile {
-	public Profile() {
-	}
+    public Profile() {
+    }
 
-	public abstract String getFullInfo();
+    public abstract String getFullInfo();
 }

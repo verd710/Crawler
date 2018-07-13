@@ -6,57 +6,57 @@ import java.net.URL;
 import java.util.concurrent.Semaphore;
 
 abstract class Parser {
-	protected String URL;
+    protected String URL;
 
-	private int maxParallelRequests = 1;
-	private int requestDelayMs = 500;
-	private final Semaphore available;
+    private int maxParallelRequests = 1;
+    private int requestDelayMs = 500;
+    private final Semaphore available;
 
-	public Parser(String URL) {
-		this.URL = URL;
+    public Parser(String URL) {
+	this.URL = URL;
 
-		// get environment variables
-		try {
-			maxParallelRequests = Integer.parseInt(System.getenv("maxParallelRequests"));
-			requestDelayMs = Integer.parseInt(System.getenv("requestDelayMs"));
-		} catch (NumberFormatException e) {
-			System.out.println(e.getMessage());
-		}
-
-		available = new Semaphore(maxParallelRequests, true);
+	// get environment variables
+	try {
+	    maxParallelRequests = Integer.parseInt(System.getenv("maxParallelRequests"));
+	    requestDelayMs = Integer.parseInt(System.getenv("requestDelayMs"));
+	} catch (NumberFormatException e) {
+	    System.out.println(e.getMessage());
 	}
 
-	protected String request(String requestURL) {
-		String response = "";
+	available = new Semaphore(maxParallelRequests, true);
+    }
 
-		try {
-			available.acquire();
-			System.out.println("Sending http request: " + requestURL + "\n");
+    protected String request(String requestURL) {
+	String response = "";
 
-			URL url = new URL(requestURL);
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			String line;
+	try {
+	    available.acquire();
+	    System.out.println("Sending http request: " + requestURL + "\n");
 
-			while ((line = in.readLine()) != null) {
-				response += line;
-			}
+	    URL url = new URL(requestURL);
+	    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+	    String line;
 
-			in.close();
-			connection.disconnect();
-			Thread.sleep(requestDelayMs);
+	    while ((line = in.readLine()) != null) {
+		response += line;
+	    }
 
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		} catch (InterruptedException e) {
-			System.out.println(e.getMessage());
-		} finally {
-			available.release();
-		}
+	    in.close();
+	    connection.disconnect();
+	    Thread.sleep(requestDelayMs);
 
-		return response;
+	} catch (IOException e) {
+	    System.out.println(e.getMessage());
+	} catch (InterruptedException e) {
+	    System.out.println(e.getMessage());
+	} finally {
+	    available.release();
 	}
 
-	public abstract Profile parse();
+	return response;
+    }
+
+    public abstract Profile parse();
 
 }
